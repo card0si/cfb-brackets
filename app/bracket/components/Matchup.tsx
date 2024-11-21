@@ -1,4 +1,15 @@
-{/* Previous imports remain the same */}
+"use client";
+
+import { cn } from "@/lib/utils";
+import { useBracket } from "./BracketContext";
+import type { Team, GameInfo } from "@/lib/types";
+import { Info, Calendar, MapPin } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface MatchupProps {
   round: number;
