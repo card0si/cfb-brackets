@@ -1,15 +1,4 @@
-"use client";
-
-import { cn } from "@/lib/utils";
-import { useBracket } from "./BracketContext";
-import type { Team, GameInfo } from "@/lib/types";
-import { Info, Calendar, MapPin } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+{/* Previous imports remain the same */}
 
 interface MatchupProps {
   round: number;
@@ -67,7 +56,7 @@ export function Matchup({
 
     return (
       <button
-        onClick={() => handleTeamClick(team)}
+        onClick={() => team && handleTeamClick(team)}
         disabled={!isByeGame && (!team1 || !team2)}
         className={cn(
           "flex items-center gap-2 px-3 h-10 rounded text-left transition-all duration-200 w-full",
@@ -111,11 +100,7 @@ export function Matchup({
   };
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-1.5 w-[260px]"
-      )}
-    >
+    <div className="flex flex-col gap-1.5 w-[260px]">
       <TeamSlot team={team1} />
       <TeamSlot team={team2} isPlaceholder={isByeGame} />
       {gameInfo && (
