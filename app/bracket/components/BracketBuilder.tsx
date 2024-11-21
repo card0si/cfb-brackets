@@ -1,241 +1,161 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Matchup } from "./Matchup";
-import { ShareButton } from "./ShareButton";
-import { PrintButton } from "./PrintButton";
+import { useState } from "react";
 import { useBracket } from "./BracketContext";
-import { gameLocations } from "@/lib/bracket-data";
-import { getFirstRoundMatchups, getByeTeams, getQuarterFinalMatchups, getSemiFinalMatchups } from "@/lib/bracket-logic";
+import { Matchup } from "./Matchup";
+import { PrintButton } from "./PrintButton";
+import { ShareButton } from "./ShareButton";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { gameLocations } from "@/lib/bracket-data"; // Fixed import path
 
 export function BracketBuilder() {
   const { teams, bracketState, resetBracket } = useBracket();
+  const [currentView, setCurrentView] = useState<'first' | 'second'>('first');
 
-  const firstRoundMatchups = getFirstRoundMatchups(teams);
-  const byeTeams = getByeTeams(teams);
-  const quarterFinalMatchups = getQuarterFinalMatchups(byeTeams, bracketState.firstRound);
-  const semiFinalMatchups = getSemiFinalMatchups(bracketState.quarterFinals);
+  // Get first round matchups (seeds 5-12)
+  const firstRoundMatchups = [
+    { seed1: 12, seed2: 5 },
+    { seed1: 9, seed2: 8 },
+    { seed1: 11, seed2: 6 },
+    { seed1: 10, seed2: 7 }
+  ];
+
+  // Get teams with first round byes (top 4 seeds)
+  const byeTeams = teams.filter(team => team.seed <= 4).sort((a, b) => a.seed - b.seed);
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-6">
-        {/* Header and Controls */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Bracket Builder</h1>
-            <p className="text-muted-foreground">
-              Click on teams to advance them through the bracket
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Bracket Builder</h1>
+          <div className="flex gap-2">
             <PrintButton />
+            <ShareButton />
             <Button variant="outline" onClick={resetBracket}>
               Reset Bracket
             </Button>
-            <ShareButton />
           </div>
         </div>
 
-        {/* Instructions and Champion Display */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Instructions */}
-          <div className="bg-card/50 rounded-xl border p-4 space-y-2">
-            <h3 className="font-semibold">How to Fill Out Your Bracket:</h3>
-            <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-1">
-              <li>First Round: Select winners from seeds 5-12 matchups</li>
-              <li>Quarter Finals: Winners face top 4 seeded teams</li>
-              <li>Semi Finals: Quarter Final winners compete</li>
-              <li>Championship: Select the national champion</li>
-            </ol>
-          </div>
+        {/* Instructions */}
+        <div className="bg-card rounded-lg p-4 text-sm text-muted-foreground">
+          <h2 className="font-semibold mb-2">How to Fill Out Your Bracket:</h2>
+          <ol className="list-decimal list-inside space-y-1">
+            <li>First Round: Select winners from seeds 5-12</li>
+            <li>Quarter Finals: Winners face top 4 seeded teams</li>
+            <li>Semi Finals: Quarter Final winners compete</li>
+            <li>Championship: Select the national champion</li>
+          </ol>
+        </div>
 
-          {/* Champion Display */}
-          {bracketState.champion ? (
-            <div className="flex items-center gap-4 bg-primary/10 rounded-xl border border-primary/20 p-4">
+        {/* Champion Display */}
+        {bracketState.champion && (
+          <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+            <h2 className="font-semibold text-primary mb-2">National Champion</h2>
+            <div className="flex items-center gap-2">
               <div
-                className="w-12 h-12 rounded-lg shrink-0"
+                className="w-6 h-6 rounded-full"
                 style={{ backgroundColor: bracketState.champion.primaryColor }}
               />
-              <div>
-                <div className="text-sm font-medium text-muted-foreground">National Champion</div>
-                <div className="text-2xl font-bold">{bracketState.champion.name}</div>
-              </div>
+              <span className="font-medium">{bracketState.champion.name}</span>
+              <span className="text-sm text-muted-foreground">
+                ({bracketState.champion.record})
+              </span>
             </div>
-          ) : (
-            <div className="flex items-center gap-4 bg-muted/50 rounded-xl border p-4">
-              <div className="w-12 h-12 rounded-lg bg-muted/50 shrink-0" />
-              <div>
-                <div className="text-sm font-medium text-muted-foreground">National Champion</div>
-                <div className="text-2xl font-bold text-muted-foreground">Not Selected</div>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Bracket Layout */}
-      <div className="relative min-h-[600px] w-full overflow-x-auto pb-8" id="bracket-container">
-        <div className="min-w-[1200px] px-8">
-          {/* Round Headers */}
-          <div className="grid grid-cols-[280px_280px_280px_280px] gap-6 mb-4">
-            <h2 className="text-lg font-semibold text-center">First Round</h2>
-            <h2 className="text-lg font-semibold text-center">Quarter Finals</h2>
-            <h2 className="text-lg font-semibold text-center">Semi Finals</h2>
-            <h2 className="text-lg font-semibold text-center">National Championship</h2>
+      {/* Mobile Navigation */}
+      <div className="flex items-center justify-between mb-4 md:hidden">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setCurrentView('first')}
+          disabled={currentView === 'first'}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          First Round & Quarter Finals
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setCurrentView('second')}
+          disabled={currentView === 'second'}
+        >
+          Semi Finals & Championship
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
+
+      {/* Bracket Container */}
+      <div id="bracket-container" className="flex-1 overflow-hidden">
+        <div className="flex flex-col md:flex-row gap-8 h-full">
+          {/* First View: First Round & Quarter Finals */}
+          <div className={`flex gap-4 ${currentView === 'first' ? 'block' : 'hidden md:flex'}`}>
+            {/* First Round */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold mb-4">First Round</h2>
+              <div className="space-y-4">
+                {firstRoundMatchups.map((matchup, index) => {
+                  const team1 = teams.find(t => t.seed === matchup.seed1);
+                  const team2 = teams.find(t => t.seed === matchup.seed2);
+                  return (
+                    <Matchup
+                      key={`first-${index}`}
+                      round={0}
+                      matchupIndex={index}
+                      team1={team1 || null}
+                      team2={team2 || null}
+                      gameInfo={gameLocations[0]?.[index]}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Quarter Finals */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold mb-4">Quarter Finals</h2>
+              <div className="space-y-4">
+                {byeTeams.map((byeTeam, index) => (
+                  <Matchup
+                    key={`quarter-${index}`}
+                    round={1}
+                    matchupIndex={index}
+                    team1={bracketState.firstRound[index]}
+                    team2={byeTeam}
+                    gameInfo={gameLocations[1]?.[index]}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Bracket Structure */}
-          <div className="relative grid grid-cols-[280px_280px_280px_280px] gap-6">
-            {/* SVG Lines Layer */}
-            <svg 
-              className="absolute inset-0 pointer-events-none" 
-              width="100%" 
-              height="100%" 
-              style={{ overflow: 'visible' }}
-            >
-              {/* First Round to Quarter Finals */}
-              <g>
-                {/* 12/5 to 4 */}
-                <path 
-                  d={`
-                    M 260,25 
-                    H 280 
-                    V 65 
-                    H 300
-                  `}
-                  stroke="#666" 
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-                {/* 9/8 to 1 */}
-                <path 
-                  d={`
-                    M 260,145 
-                    H 280 
-                    V 185 
-                    H 300
-                  `}
-                  stroke="#666" 
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-                {/* 11/6 to 3 */}
-                <path 
-                  d={`
-                    M 260,265 
-                    H 280 
-                    V 305 
-                    H 300
-                  `}
-                  stroke="#666" 
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-                {/* 10/7 to 2 */}
-                <path 
-                  d={`
-                    M 260,385 
-                    H 280 
-                    V 425 
-                    H 300
-                  `}
-                  stroke="#666" 
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-              </g>
-
-              {/* Quarter Finals to Semi Finals */}
-              <g>
-                {/* Top bracket */}
-                <path 
-                  d={`
-                    M 540,125 
-                    H 560 
-                    V 185 
-                    H 580
-                  `}
-                  stroke="#666" 
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-                {/* Bottom bracket */}
-                <path 
-                  d={`
-                    M 540,365 
-                    H 560 
-                    V 305 
-                    H 580
-                  `}
-                  stroke="#666" 
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-              </g>
-
-              {/* Semi Finals to Championship */}
-              <path 
-                d={`
-                  M 820,245 
-                  H 860
-                `}
-                stroke="#666" 
-                strokeWidth="2"
-                fill="none"
-                strokeLinecap="round"
-              />
-            </svg>
-
-            {/* First Round Column */}
-            <div className="space-y-8 relative z-10">
-              {firstRoundMatchups.map(([team1, team2], index) => (
-                <Matchup
-                  key={`first-${index}`}
-                  round={0}
-                  matchupIndex={index}
-                  team1={team1}
-                  team2={team2}
-                  gameInfo={gameLocations[0]?.[index]}
-                />
-              ))}
-            </div>
-
-            {/* Quarter Finals Column */}
-            <div className="space-y-16 pt-4 relative z-10">
-              {quarterFinalMatchups.map(([team1, team2], index) => (
-                <Matchup
-                  key={`quarter-${index}`}
-                  round={1}
-                  matchupIndex={index}
-                  team1={team1}
-                  team2={team2}
-                  gameInfo={gameLocations[1]?.[index]}
-                />
-              ))}
-            </div>
-
-            {/* Semi Finals Column */}
-            <div className="space-y-32 pt-16 relative z-10">
-              {semiFinalMatchups.map(([team1, team2], index) => (
-                <Matchup
-                  key={`semi-${index}`}
-                  round={2}
-                  matchupIndex={index}
-                  team1={team1}
-                  team2={team2}
-                  gameInfo={gameLocations[2]?.[index]}
-                />
-              ))}
+          {/* Second View: Semi Finals & Championship */}
+          <div className={`flex gap-4 ${currentView === 'second' ? 'block' : 'hidden md:flex'}`}>
+            {/* Semi Finals */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold mb-4">Semi Finals</h2>
+              <div className="space-y-4">
+                {[0, 1].map(index => (
+                  <Matchup
+                    key={`semi-${index}`}
+                    round={2}
+                    matchupIndex={index}
+                    team1={bracketState.quarterFinals[index * 2]}
+                    team2={bracketState.quarterFinals[index * 2 + 1]}
+                    gameInfo={gameLocations[2]?.[index]}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Championship */}
-            <div className="pt-32 relative z-10">
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold mb-4">National Championship</h2>
               <Matchup
                 round={3}
                 matchupIndex={0}

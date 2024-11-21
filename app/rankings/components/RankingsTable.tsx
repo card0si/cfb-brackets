@@ -32,6 +32,7 @@ export function RankingsTable({ weeklyRankings, selectedWeek, onWeekChange }: Ra
   const [searchQuery, setSearchQuery] = useState("");
 
   const currentWeekRankings = weeklyRankings.find(w => w.week === selectedWeek)?.rankings || [];
+  const previousWeekRankings = weeklyRankings.find(w => w.week === selectedWeek - 1)?.rankings || [];
   
   const filteredRankings = currentWeekRankings.filter((team) =>
     team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -39,6 +40,12 @@ export function RankingsTable({ weeklyRankings, selectedWeek, onWeekChange }: Ra
   );
 
   const getTrendIcon = (team: RankedTeam) => {
+    // Check if team was not ranked in previous week
+    const wasRankedLastWeek = previousWeekRankings.some(prevTeam => prevTeam.name === team.name);
+    if (!wasRankedLastWeek) {
+      return <span className="text-green-500 font-medium text-xs">NEW</span>;
+    }
+
     const difference = team.previousRank - team.currentRank;
     
     if (difference === 0) {
@@ -50,6 +57,17 @@ export function RankingsTable({ weeklyRankings, selectedWeek, onWeekChange }: Ra
     }
 
     return <ArrowDownCircle className="w-4 h-4 text-red-500" />;
+  };
+
+  const getTrendValue = (team: RankedTeam) => {
+    const wasRankedLastWeek = previousWeekRankings.some(prevTeam => prevTeam.name === team.name);
+    if (!wasRankedLastWeek) {
+      return "-";
+    }
+
+    const difference = team.previousRank - team.currentRank;
+    if (difference === 0) return "-";
+    return difference > 0 ? `+${difference}` : difference;
   };
 
   return (
@@ -154,9 +172,7 @@ export function RankingsTable({ weeklyRankings, selectedWeek, onWeekChange }: Ra
                     team.previousRank - team.currentRank < 0 && "text-red-500",
                     team.previousRank - team.currentRank === 0 && "text-muted-foreground"
                   )}>
-                    {team.previousRank - team.currentRank === 0 ? "-" : 
-                     team.previousRank - team.currentRank > 0 ? `+${team.previousRank - team.currentRank}` :
-                     team.previousRank - team.currentRank}
+                    {getTrendValue(team)}
                   </span>
                 </div>
               </TableCell>

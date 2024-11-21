@@ -1,0 +1,9 @@
+<content># *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://cfb-bracket.vercel.app
+
+# Sitemaps
+Sitemap: https://cfb-bracket.vercel.app/sitemap.xml</content>

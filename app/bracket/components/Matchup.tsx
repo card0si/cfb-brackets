@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useBracket } from "./BracketContext";
 import type { Team, GameInfo } from "@/lib/types";
-import { Info, Calendar, MapPin } from "lucide-react";
+import { Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -18,7 +18,6 @@ interface MatchupProps {
   team2: Team | null;
   isChampionship?: boolean;
   gameInfo?: GameInfo;
-  isByeGame?: boolean;
 }
 
 export function Matchup({
@@ -28,15 +27,10 @@ export function Matchup({
   team2,
   isChampionship = false,
   gameInfo,
-  isByeGame = false,
 }: MatchupProps) {
   const { updateMatchupWinner, bracketState } = useBracket();
 
   const handleTeamClick = (team: Team) => {
-    if (isByeGame) {
-      updateMatchupWinner(round, matchupIndex, team);
-      return;
-    }
     if (!team1 || !team2) return;
     updateMatchupWinner(round, matchupIndex, team);
   };
@@ -52,41 +46,47 @@ export function Matchup({
     }
   };
 
-  const TeamSlot = ({ team, isPlaceholder = false }: { team: Team | null; isPlaceholder?: boolean }) => {
-    if (!team && !isPlaceholder) return (
-      <div className="h-10 flex items-center justify-center border border-dashed border-border/50 rounded bg-black/5">
+  const TeamSlot = ({ team }: { team: Team | null }) => {
+    if (!team) return (
+      <div className="h-[60px] flex items-center justify-center border border-dashed border-border/50 rounded-lg">
         <span className="text-sm text-muted-foreground">TBD</span>
-      </div>
-    );
-
-    if (!team && isPlaceholder) return (
-      <div className="h-10 flex items-center justify-center border border-dashed border-border/30 rounded bg-black/5">
-        <span className="text-sm text-muted-foreground/50">Bye</span>
       </div>
     );
 
     return (
       <button
-        onClick={() => team && handleTeamClick(team)}
-        disabled={!isByeGame && (!team1 || !team2)}
+        onClick={() => handleTeamClick(team)}
+        disabled={!team1 || !team2}
         className={cn(
-          "flex items-center gap-2 px-3 h-10 rounded text-left transition-all duration-200 w-full",
+          "flex items-center gap-2 p-2 h-[60px] rounded-lg text-left transition-all duration-200 w-full",
           "hover:bg-accent hover:text-accent-foreground group",
           "disabled:opacity-50 disabled:cursor-not-allowed",
+          "border border-transparent",
           isTeamWinner(team)
-            ? "bg-primary text-primary-foreground"
-            : "bg-black/5 hover:bg-accent/50 active:scale-[0.98]"
+            ? "bg-primary/20 text-primary border-primary/50 hover:bg-primary/30"
+            : "hover:bg-accent/50 active:scale-[0.98] hover:border-border/80",
+          "dark:shadow-sm"
         )}
         style={{
           backgroundColor: isTeamWinner(team) ? team.primaryColor : undefined,
         }}
       >
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <span className="text-sm font-semibold w-6 text-center">{team.seed}</span>
-          <span className="font-semibold truncate">{team.name}</span>
-          {round === 0 && team.seed <= 8 && (
-            <span className="text-xs text-muted-foreground ml-auto">(Home)</span>
+        <div className="relative w-6 h-6 rounded-md bg-muted/80 flex items-center justify-center shrink-0">
+          {team.logoUrl ? (
+            <img
+              src={team.logoUrl}
+              alt={`${team.name} logo`}
+              className="w-4 h-4 object-contain"
+            />
+          ) : (
+            <span className="text-xs font-semibold">{team.seed}</span>
           )}
+        </div>
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="font-semibold truncate text-sm">{team.name}</span>
+          <span className="text-xs text-muted-foreground truncate">
+            {team.conference} {team.record && `(${team.record})`}
+          </span>
         </div>
         {team.stats && (
           <TooltipProvider>
@@ -111,28 +111,19 @@ export function Matchup({
   };
 
   return (
-    <div className="flex flex-col gap-1.5 w-[260px]">
+    <div
+      className={cn(
+        "flex flex-col gap-2 w-[280px] p-3 rounded-lg bg-card/90 shadow-sm",
+        "border border-border/80",
+        isChampionship && "ring-2 ring-primary/80 ring-offset-2 ring-offset-background"
+      )}
+    >
       <TeamSlot team={team1} />
-      <TeamSlot team={team2} isPlaceholder={isByeGame} />
+      <TeamSlot team={team2} />
       {gameInfo && (
-        <div className="mt-1 text-xs text-muted-foreground space-y-0.5">
-          {round === 0 ? (
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              <p>{gameInfo.dateTime}</p>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center gap-1">
-                <MapPin className="w-3 h-3" />
-                <p>{gameInfo.location}</p>
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                <p>{gameInfo.dateTime}</p>
-              </div>
-            </>
-          )}
+        <div className="text-xs text-muted-foreground">
+          <p className="truncate">{gameInfo.location}</p>
+          <p className="truncate">{gameInfo.dateTime}</p>
         </div>
       )}
     </div>
