@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useBracket } from "./BracketContext";
 import { Matchup } from "./Matchup";
 import { PrintButton } from "./PrintButton";
@@ -27,11 +26,11 @@ export function BracketBuilder() {
     <div className="flex flex-col min-h-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
-        <h1 className="text-2xl font-bold">Bracket Builder</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">Bracket Builder</h1>
         <div className="flex gap-2">
           <PrintButton />
           <ShareButton />
-          <Button variant="outline" onClick={resetBracket}>
+          <Button variant="outline" onClick={resetBracket} size="sm">
             Reset
           </Button>
         </div>
@@ -40,7 +39,7 @@ export function BracketBuilder() {
       {/* Instructions and Champion Box */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {/* Instructions */}
-        <div className="bg-card rounded-lg p-4 text-sm text-muted-foreground">
+        <div className="bg-card rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-muted-foreground">
           <h2 className="font-semibold mb-2">How to Fill Out Your Bracket:</h2>
           <ol className="list-decimal list-inside space-y-1">
             <li>First Round: Select winners from seeds 5-12</li>
@@ -51,23 +50,23 @@ export function BracketBuilder() {
         </div>
 
         {/* Champion Box */}
-        <div className={`bg-card rounded-lg p-4 flex items-center gap-4 ${bracketState.champion ? 'bg-primary/10 border border-primary/20' : ''}`}>
-          <Trophy className={`h-8 w-8 ${bracketState.champion ? 'text-primary' : 'text-muted-foreground'}`} />
+        <div className={`bg-card rounded-lg p-3 sm:p-4 flex items-center gap-3 ${bracketState.champion ? 'bg-primary/10 border border-primary/20' : ''}`}>
+          <Trophy className={`h-6 w-6 sm:h-8 sm:w-8 ${bracketState.champion ? 'text-primary' : 'text-muted-foreground'}`} />
           <div>
-            <h2 className="font-semibold mb-1">National Champion</h2>
+            <h2 className="font-semibold mb-1 text-sm sm:text-base">National Champion</h2>
             {bracketState.champion ? (
               <div className="flex items-center gap-2">
                 <div
-                  className="w-4 h-4 rounded-full"
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full"
                   style={{ backgroundColor: bracketState.champion.primaryColor }}
                 />
-                <span className="font-medium">{bracketState.champion.name}</span>
-                <span className="text-sm text-muted-foreground">
+                <span className="font-medium text-sm">{bracketState.champion.name}</span>
+                <span className="text-xs text-muted-foreground">
                   ({bracketState.champion.record})
                 </span>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Complete your bracket to crown a champion
               </p>
             )}
@@ -77,11 +76,11 @@ export function BracketBuilder() {
 
       {/* Bracket Container */}
       <div id="bracket-container" className="flex-1 overflow-x-auto pb-4">
-        <div className="min-w-[1000px] md:min-w-0 grid grid-cols-4 gap-4 md:gap-8">
+        <div className="min-w-[900px] md:min-w-0 grid grid-cols-4 gap-3 md:gap-6">
           {/* First Round */}
-          <div className="space-y-3">
-            <h2 className="text-lg font-semibold mb-3 sticky left-0">First Round</h2>
-            <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
+            <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 sticky left-0">First Round</h2>
+            <div className="space-y-2 sm:space-y-3">
               {firstRoundMatchups.map((matchup, index) => {
                 const team1 = teams.find(t => t.seed === matchup.seed1);
                 const team2 = teams.find(t => t.seed === matchup.seed2);
@@ -100,9 +99,9 @@ export function BracketBuilder() {
           </div>
 
           {/* Quarter Finals */}
-          <div className="space-y-3">
-            <h2 className="text-lg font-semibold mb-3">Quarter Finals</h2>
-            <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
+            <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Quarter Finals</h2>
+            <div className="space-y-2 sm:space-y-3">
               {byeTeams.map((byeTeam, index) => (
                 <Matchup
                   key={`quarter-${index}`}
@@ -117,9 +116,9 @@ export function BracketBuilder() {
           </div>
 
           {/* Semi Finals */}
-          <div className="space-y-3">
-            <h2 className="text-lg font-semibold mb-3">Semi Finals</h2>
-            <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
+            <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Semi Finals</h2>
+            <div className="space-y-2 sm:space-y-3">
               {[0, 1].map(index => (
                 <Matchup
                   key={`semi-${index}`}
@@ -134,8 +133,8 @@ export function BracketBuilder() {
           </div>
 
           {/* Championship */}
-          <div className="space-y-3">
-            <h2 className="text-lg font-semibold mb-3">National Championship</h2>
+          <div className="space-y-2 sm:space-y-3">
+            <h2 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">National Championship</h2>
             <Matchup
               round={3}
               matchupIndex={0}

@@ -32,7 +32,11 @@ export function Matchup({
 
   const handleTeamClick = (team: Team | null) => {
     if (!team) return;
-    updateMatchupWinner(round, matchupIndex, team);
+    
+    // Immediately update the winner
+    requestAnimationFrame(() => {
+      updateMatchupWinner(round, matchupIndex, team);
+    });
   };
 
   const isTeamWinner = (team: Team | null) => {
@@ -48,8 +52,8 @@ export function Matchup({
 
   const TeamSlot = ({ team }: { team: Team | null }) => {
     if (!team) return (
-      <div className="h-[60px] flex items-center justify-center border border-dashed border-border/50 rounded-lg">
-        <span className="text-sm text-muted-foreground">TBD</span>
+      <div className="h-[48px] sm:h-[54px] flex items-center justify-center border border-dashed border-border/50 rounded-lg">
+        <span className="text-xs sm:text-sm text-muted-foreground">TBD</span>
       </div>
     );
 
@@ -57,8 +61,8 @@ export function Matchup({
       <button
         onClick={() => handleTeamClick(team)}
         className={cn(
-          "flex items-center gap-2 p-2 h-[60px] rounded-lg text-left transition-all duration-200 w-full",
-          "hover:bg-accent hover:text-accent-foreground group",
+          "flex items-center gap-2 p-2 h-[48px] sm:h-[54px] rounded-lg text-left transition-all duration-200 w-full",
+          "hover:bg-accent hover:text-accent-foreground group touch-manipulation",
           "border border-transparent",
           isTeamWinner(team)
             ? "bg-primary/20 text-primary border-primary/50 hover:bg-primary/30"
@@ -67,23 +71,24 @@ export function Matchup({
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
         )}
         style={{
-          backgroundColor: isTeamWinner(team) ? team.primaryColor : undefined,
+          backgroundColor: isTeamWinner(team) ? `${team.primaryColor}30` : undefined,
+          borderColor: isTeamWinner(team) ? team.primaryColor : undefined,
         }}
       >
-        <div className="relative w-6 h-6 rounded-md bg-muted/80 flex items-center justify-center shrink-0">
+        <div className="relative w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-muted/80 flex items-center justify-center shrink-0">
           {team.logoUrl ? (
             <img
               src={team.logoUrl}
               alt={`${team.name} logo`}
-              className="w-4 h-4 object-contain"
+              className="w-3 h-3 sm:w-4 sm:h-4 object-contain"
             />
           ) : (
-            <span className="text-xs font-semibold">{team.seed}</span>
+            <span className="text-[10px] sm:text-xs font-semibold">{team.seed}</span>
           )}
         </div>
         <div className="flex flex-col min-w-0 flex-1">
-          <span className="font-semibold truncate text-sm">{team.name}</span>
-          <span className="text-xs text-muted-foreground truncate">
+          <span className="font-semibold truncate text-xs sm:text-sm">{team.name}</span>
+          <span className="text-[10px] sm:text-xs text-muted-foreground truncate">
             {team.conference} {team.record && `(${team.record})`}
           </span>
         </div>
@@ -91,10 +96,10 @@ export function Matchup({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                <Info className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
               </TooltipTrigger>
               <TooltipContent>
-                <div className="text-sm">
+                <div className="text-xs sm:text-sm">
                   <p>Offense Rank: #{team.stats.offenseRank}</p>
                   <p>Defense Rank: #{team.stats.defenseRank}</p>
                   {team.stats.keyPlayer && (
@@ -112,7 +117,7 @@ export function Matchup({
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 w-full md:w-[280px] p-3 rounded-lg bg-card/90 shadow-sm",
+        "flex flex-col gap-2 w-full md:w-[260px] p-2 sm:p-3 rounded-lg bg-card/90 shadow-sm",
         "border border-border/80",
         isChampionship && "ring-2 ring-primary/80 ring-offset-2 ring-offset-background"
       )}
@@ -120,7 +125,7 @@ export function Matchup({
       <TeamSlot team={team1} />
       <TeamSlot team={team2} />
       {gameInfo && (
-        <div className="text-xs text-muted-foreground">
+        <div className="text-[10px] sm:text-xs text-muted-foreground">
           <p className="truncate">{gameInfo.location}</p>
           <p className="truncate">{gameInfo.dateTime}</p>
         </div>
