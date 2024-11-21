@@ -6,12 +6,11 @@ import { Matchup } from "./Matchup";
 import { PrintButton } from "./PrintButton";
 import { ShareButton } from "./ShareButton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { gameLocations } from "@/lib/bracket-data";
 
 export function BracketBuilder() {
   const { teams, bracketState, resetBracket } = useBracket();
-  const [currentView, setCurrentView] = useState<'first' | 'second'>('first');
 
   // Get first round matchups (seeds 5-12)
   const firstRoundMatchups = [
@@ -27,19 +26,19 @@ export function BracketBuilder() {
   return (
     <div className="flex flex-col min-h-full">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold">Bracket Builder</h1>
         <div className="flex gap-2">
           <PrintButton />
           <ShareButton />
           <Button variant="outline" onClick={resetBracket}>
-            Reset Bracket
+            Reset
           </Button>
         </div>
       </div>
 
       {/* Instructions and Champion Box */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {/* Instructions */}
         <div className="bg-card rounded-lg p-4 text-sm text-muted-foreground">
           <h2 className="font-semibold mb-2">How to Fill Out Your Bracket:</h2>
@@ -76,103 +75,75 @@ export function BracketBuilder() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
-      <div className="flex items-center justify-between mb-4 md:hidden">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCurrentView('first')}
-          disabled={currentView === 'first'}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          First Round & Quarter Finals
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCurrentView('second')}
-          disabled={currentView === 'second'}
-        >
-          Semi Finals & Championship
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
-      </div>
-
       {/* Bracket Container */}
-      <div id="bracket-container" className="flex-1 mb-8 md:mb-16">
-        <div className="flex flex-col md:flex-row gap-8 h-full">
-          {/* First View: First Round & Quarter Finals */}
-          <div className={`flex gap-4 ${currentView === 'first' ? 'block' : 'hidden md:flex'}`}>
-            {/* First Round */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold mb-4">First Round</h2>
-              <div className="space-y-4">
-                {firstRoundMatchups.map((matchup, index) => {
-                  const team1 = teams.find(t => t.seed === matchup.seed1);
-                  const team2 = teams.find(t => t.seed === matchup.seed2);
-                  return (
-                    <Matchup
-                      key={`first-${index}`}
-                      round={0}
-                      matchupIndex={index}
-                      team1={team1 || null}
-                      team2={team2 || null}
-                      gameInfo={gameLocations[0]?.[index]}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Quarter Finals */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold mb-4">Quarter Finals</h2>
-              <div className="space-y-4">
-                {byeTeams.map((byeTeam, index) => (
+      <div id="bracket-container" className="flex-1 overflow-x-auto pb-4">
+        <div className="min-w-[1000px] md:min-w-0 grid grid-cols-4 gap-4 md:gap-8">
+          {/* First Round */}
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold mb-3 sticky left-0">First Round</h2>
+            <div className="space-y-3">
+              {firstRoundMatchups.map((matchup, index) => {
+                const team1 = teams.find(t => t.seed === matchup.seed1);
+                const team2 = teams.find(t => t.seed === matchup.seed2);
+                return (
                   <Matchup
-                    key={`quarter-${index}`}
-                    round={1}
+                    key={`first-${index}`}
+                    round={0}
                     matchupIndex={index}
-                    team1={bracketState.firstRound[index]}
-                    team2={byeTeam}
-                    gameInfo={gameLocations[1]?.[index]}
+                    team1={team1 || null}
+                    team2={team2 || null}
+                    gameInfo={gameLocations[0]?.[index]}
                   />
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Second View: Semi Finals & Championship */}
-          <div className={`flex gap-4 ${currentView === 'second' ? 'block' : 'hidden md:flex'}`}>
-            {/* Semi Finals */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold mb-4">Semi Finals</h2>
-              <div className="space-y-4">
-                {[0, 1].map(index => (
-                  <Matchup
-                    key={`semi-${index}`}
-                    round={2}
-                    matchupIndex={index}
-                    team1={bracketState.quarterFinals[index * 2]}
-                    team2={bracketState.quarterFinals[index * 2 + 1]}
-                    gameInfo={gameLocations[2]?.[index]}
-                  />
-                ))}
-              </div>
+          {/* Quarter Finals */}
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold mb-3">Quarter Finals</h2>
+            <div className="space-y-3">
+              {byeTeams.map((byeTeam, index) => (
+                <Matchup
+                  key={`quarter-${index}`}
+                  round={1}
+                  matchupIndex={index}
+                  team1={bracketState.firstRound[index]}
+                  team2={byeTeam}
+                  gameInfo={gameLocations[1]?.[index]}
+                />
+              ))}
             </div>
+          </div>
 
-            {/* Championship */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold mb-4">National Championship</h2>
-              <Matchup
-                round={3}
-                matchupIndex={0}
-                team1={bracketState.semiFinals[0]}
-                team2={bracketState.semiFinals[1]}
-                isChampionship
-                gameInfo={gameLocations[3]?.[0]}
-              />
+          {/* Semi Finals */}
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold mb-3">Semi Finals</h2>
+            <div className="space-y-3">
+              {[0, 1].map(index => (
+                <Matchup
+                  key={`semi-${index}`}
+                  round={2}
+                  matchupIndex={index}
+                  team1={bracketState.quarterFinals[index * 2]}
+                  team2={bracketState.quarterFinals[index * 2 + 1]}
+                  gameInfo={gameLocations[2]?.[index]}
+                />
+              ))}
             </div>
+          </div>
+
+          {/* Championship */}
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold mb-3">National Championship</h2>
+            <Matchup
+              round={3}
+              matchupIndex={0}
+              team1={bracketState.semiFinals[0]}
+              team2={bracketState.semiFinals[1]}
+              isChampionship
+              gameInfo={gameLocations[3]?.[0]}
+            />
           </div>
         </div>
       </div>
