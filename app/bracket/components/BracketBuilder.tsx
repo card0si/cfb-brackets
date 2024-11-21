@@ -6,8 +6,8 @@ import { Matchup } from "./Matchup";
 import { PrintButton } from "./PrintButton";
 import { ShareButton } from "./ShareButton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { gameLocations } from "@/lib/bracket-data"; // Fixed import path
+import { ArrowLeft, ArrowRight, Trophy } from "lucide-react";
+import { gameLocations } from "@/lib/bracket-data";
 
 export function BracketBuilder() {
   const { teams, bracketState, resetBracket } = useBracket();
@@ -25,20 +25,21 @@ export function BracketBuilder() {
   const byeTeams = teams.filter(team => team.seed <= 4).sort((a, b) => a.seed - b.seed);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col min-h-full">
       {/* Header */}
-      <div className="flex flex-col gap-4 mb-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Bracket Builder</h1>
-          <div className="flex gap-2">
-            <PrintButton />
-            <ShareButton />
-            <Button variant="outline" onClick={resetBracket}>
-              Reset Bracket
-            </Button>
-          </div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Bracket Builder</h1>
+        <div className="flex gap-2">
+          <PrintButton />
+          <ShareButton />
+          <Button variant="outline" onClick={resetBracket}>
+            Reset Bracket
+          </Button>
         </div>
+      </div>
 
+      {/* Instructions and Champion Box */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         {/* Instructions */}
         <div className="bg-card rounded-lg p-4 text-sm text-muted-foreground">
           <h2 className="font-semibold mb-2">How to Fill Out Your Bracket:</h2>
@@ -50,22 +51,29 @@ export function BracketBuilder() {
           </ol>
         </div>
 
-        {/* Champion Display */}
-        {bracketState.champion && (
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-            <h2 className="font-semibold text-primary mb-2">National Champion</h2>
-            <div className="flex items-center gap-2">
-              <div
-                className="w-6 h-6 rounded-full"
-                style={{ backgroundColor: bracketState.champion.primaryColor }}
-              />
-              <span className="font-medium">{bracketState.champion.name}</span>
-              <span className="text-sm text-muted-foreground">
-                ({bracketState.champion.record})
-              </span>
-            </div>
+        {/* Champion Box */}
+        <div className={`bg-card rounded-lg p-4 flex items-center gap-4 ${bracketState.champion ? 'bg-primary/10 border border-primary/20' : ''}`}>
+          <Trophy className={`h-8 w-8 ${bracketState.champion ? 'text-primary' : 'text-muted-foreground'}`} />
+          <div>
+            <h2 className="font-semibold mb-1">National Champion</h2>
+            {bracketState.champion ? (
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 rounded-full"
+                  style={{ backgroundColor: bracketState.champion.primaryColor }}
+                />
+                <span className="font-medium">{bracketState.champion.name}</span>
+                <span className="text-sm text-muted-foreground">
+                  ({bracketState.champion.record})
+                </span>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Complete your bracket to crown a champion
+              </p>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Mobile Navigation */}
@@ -91,7 +99,7 @@ export function BracketBuilder() {
       </div>
 
       {/* Bracket Container */}
-      <div id="bracket-container" className="flex-1 overflow-hidden">
+      <div id="bracket-container" className="flex-1 mb-8 md:mb-16">
         <div className="flex flex-col md:flex-row gap-8 h-full">
           {/* First View: First Round & Quarter Finals */}
           <div className={`flex gap-4 ${currentView === 'first' ? 'block' : 'hidden md:flex'}`}>

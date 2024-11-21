@@ -31,7 +31,10 @@ export function Matchup({
   const { updateMatchupWinner, bracketState } = useBracket();
 
   const handleTeamClick = (team: Team) => {
-    if (!team1 || !team2) return;
+    // Only allow selection if both teams are present (except for first round)
+    if (round > 0 && (!team1 || !team2)) {
+      return;
+    }
     updateMatchupWinner(round, matchupIndex, team);
   };
 
@@ -56,16 +59,16 @@ export function Matchup({
     return (
       <button
         onClick={() => handleTeamClick(team)}
-        disabled={!team1 || !team2}
+        disabled={round > 0 && (!team1 || !team2)}
         className={cn(
           "flex items-center gap-2 p-2 h-[60px] rounded-lg text-left transition-all duration-200 w-full",
           "hover:bg-accent hover:text-accent-foreground group",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
           "border border-transparent",
           isTeamWinner(team)
             ? "bg-primary/20 text-primary border-primary/50 hover:bg-primary/30"
             : "hover:bg-accent/50 active:scale-[0.98] hover:border-border/80",
-          "dark:shadow-sm"
+          "dark:shadow-sm",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
         )}
         style={{
           backgroundColor: isTeamWinner(team) ? team.primaryColor : undefined,

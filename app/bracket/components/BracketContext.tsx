@@ -21,20 +21,43 @@ export function BracketProvider({ children }: { children: React.ReactNode }) {
     setBracketState((prev) => {
       const newState = { ...prev };
       
+      // Only update the current round's winner
       switch (roundIndex) {
-        case 0:
+        case 0: // First Round
           newState.firstRound[matchupIndex] = winner;
           break;
-        case 1:
+          
+        case 1: // Quarter Finals
           newState.quarterFinals[matchupIndex] = winner;
           break;
-        case 2:
+          
+        case 2: // Semi Finals
           newState.semiFinals[matchupIndex] = winner;
           break;
-        case 3:
+          
+        case 3: // Championship
           newState.championship = winner;
           newState.champion = winner;
           break;
+      }
+
+      // Clear subsequent rounds when a team is selected in an earlier round
+      if (roundIndex === 0) {
+        // Clear related quarterfinal slot
+        newState.quarterFinals[matchupIndex] = null;
+        // Clear potential semifinal and championship slots
+        newState.semiFinals[Math.floor(matchupIndex / 2)] = null;
+        newState.championship = null;
+        newState.champion = null;
+      } else if (roundIndex === 1) {
+        // Clear related semifinal slot
+        newState.semiFinals[Math.floor(matchupIndex / 2)] = null;
+        newState.championship = null;
+        newState.champion = null;
+      } else if (roundIndex === 2) {
+        // Clear championship slot
+        newState.championship = null;
+        newState.champion = null;
       }
       
       return newState;
